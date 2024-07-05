@@ -45,15 +45,15 @@ int main()
 
     // Loop para testar o botão
     while (1) {
-        if ((*KEY_ptr & 0b0) == 0) {
-            printf("NUM: %d\n", *KEY_ptr);
+        if ((*KEY_ptr & 0) == 0) {
+            printf("Botão pressionado!\n");
             set_background_color(0, 0, 7);
             // Espera até o botão ser solto
             
         }
-        if (((*KEY_ptr & 0b10) >> 1) == 0) {
+        if ((*KEY_ptr & 0b10) == 0) {
             printf("A");
-            set_background_color(7, 7, 7);
+            set_background_color(7, 0, 0);
         }
         usleep(100000); // Espera por 100ms
     }

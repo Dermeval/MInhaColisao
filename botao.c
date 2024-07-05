@@ -1,27 +1,14 @@
 #include <stdio.h>
-#include <unistd.h>
-#include <stdint.h>
-#include "gpu_lib.h"
 #include <stdlib.h>
 #include <fcntl.h>       
 #include <sys/mman.h>
- 
+#include <unistd.h>  
 #define KEY_BASE 0x0
 #define LW_BRIDGE_BASE 0xFF200000
 #define LW_BRIDGE_SPAN 0x00005000
 
-int main()
-{   
-    /* Tentar abrir o arquivo do kernel do driver da GPU */
-    if (open_gpu_device() == 0)
-        return 0;
 
-    create_sprite(0, 15, 100, 100, 2, 1);
-    create_sprite(1, 10, 100, 100, 0, 1);
-    printf("cordX: %d, cordY: %d", sprites_array[0].pos_x, sprites_array[0].pos_y);
-    int is_colliding = collision(&sprites_array[0], &sprites_array[1]);
-    printf("\n\nCOLLISION: %d\n ", is_colliding);
-
+int main(void) {
     volatile int *KEY_ptr;
     int fd = -1;
     void *LW_virtual;
@@ -45,15 +32,10 @@ int main()
 
     // Loop para testar o botão
     while (1) {
-        if ((*KEY_ptr & 0b0) == 0) {
-            printf("NUM: %d\n", *KEY_ptr);
-            set_background_color(0, 0, 7);
+        if ((*KEY_ptr & 0) == 0) {
+            printf("Botão pressionado!\n");
             // Espera até o botão ser solto
-            
-        }
-        if (((*KEY_ptr & 0b10) >> 1) == 0) {
-            printf("A");
-            set_background_color(7, 7, 7);
+            while ((*KEY_ptr & 0x1) == 0x1);
         }
         usleep(100000); // Espera por 100ms
     }
@@ -61,10 +43,6 @@ int main()
     // Desmapeia a memória e fecha o arquivo
     munmap(LW_virtual, LW_BRIDGE_SPAN);
     close(fd);
-
-    return 0;
-
-    close_gpu_devide(); /* Fecha o arquivo do driver da GPU */
 
     return 0;
 }
