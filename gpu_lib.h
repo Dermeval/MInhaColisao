@@ -101,7 +101,7 @@ uint8_t create_sprite(uint8_t array_position, uint8_t reg, uint16_t x, uint16_t 
 
 void close_gpu_devide ();
 
-void increase_coordinate(Sprite *sp, uint8_t mirror);
+void change_coordinate(Sprite *sp, uint16_t new_x, uint16_t new_y, uint8_t mirror);
 
 void clear_background_blocks();
 

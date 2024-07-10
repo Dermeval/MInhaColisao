@@ -5,7 +5,6 @@
 #include <stdlib.h>
 #include <fcntl.h>       
 #include <sys/mman.h>
-#include "draw_screens.h"
  
 #define KEY_BASE 0x0
 #define LW_BRIDGE_BASE 0xFF200000
@@ -17,6 +16,11 @@ int main()
     if (open_gpu_device() == 0)
         return 0;
 
+    create_sprite(0, 15, 100, 100, 2, 1);
+    create_sprite(1, 10, 100, 100, 0, 1);
+    printf("cordX: %d, cordY: %d", sprites_array[0].pos_x, sprites_array[0].pos_y);
+    int is_colliding = collision(&sprites_array[0], &sprites_array[1]);
+    printf("\n\nCOLLISION: %d\n ", is_colliding);
 
     volatile int *KEY_ptr;
     int fd = -1;
@@ -38,21 +42,18 @@ int main()
 
     // Obtem o ponteiro para o endereço do botão
     KEY_ptr = (volatile int *)(LW_virtual + KEY_BASE);
-    set_background_color(0, 0, 0);
+
     // Loop para testar o botão
     while (1) {
-        printf("BTN: %d\n", *KEY_ptr & 0b1);
-        if ((*KEY_ptr & 0b1) == 0) {
-            //printf("Botão pressionado!\n");
-            draw_pause_screen();
+        if ((*KEY_ptr & 0) == 0) {
+            printf("Botão pressionado!\n");
+            set_background_color(0, 0, 7);
             // Espera até o botão ser solto
             
         }
         if ((*KEY_ptr & 0b10) == 0) {
-            clear_background_blocks();
-            clear_poligonos();
-            clear_sprites();
-            set_background_color(0, 0, 0);
+            printf("A");
+            set_background_color(7, 0, 0);
         }
         usleep(100000); // Espera por 100ms
     }

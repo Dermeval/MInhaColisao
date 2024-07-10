@@ -41,10 +41,9 @@
 
 int fd = 0;
 
-
-
 Sprite_Fixed fixed_sprites_array[5];
 Sprite sprites_array[5];
+
 
 /**
  * \brief           Usada para abrir o arquivo do driver da GPU
@@ -231,45 +230,11 @@ uint8_t set_sprite_pixel_color(uint16_t address, uint8_t R, uint8_t G, uint8_t B
  * \param[in]       sp: Ponteiro do sprite que deve ter suas coordenadas atualizadas
  * \param[in]       mirror: Define se as coordendas do sprite enviado devem ser espelhadas
  */
-void increase_coordinate(Sprite *sp, uint8_t mirror)
+void change_coordinate(Sprite *sp, uint16_t new_x, uint16_t new_y, uint8_t mirror)
 {
-    if ((*sp).direction == LEFT)
-    {
-        (*sp).pos_x -= (*sp).step_x;
-    }
-    else if ((*sp).direction == RIGHT)
-    {
-        (*sp).pos_x += (*sp).step_x;
-    }
-    else if ((*sp).direction == UP)
-    {
-        (*sp).pos_y -= (*sp).step_y;
-    }
-    else if ((*sp).direction == DOWN)
-    {
-        (*sp).pos_y += (*sp).step_y;
-    }
-    else if ((*sp).direction == UPPER_RIGHT)
-    {
-        (*sp).pos_y -= (*sp).step_y;
-        (*sp).pos_x += (*sp).step_x;
-    }
-    else if ((*sp).direction == UPPER_LEFT)
-    {
-        (*sp).pos_y -= (*sp).step_y;
-        (*sp).pos_x -= (*sp).step_x;
-    }
-    else if ((*sp).direction == BOTTOM_LEFT)
-    {
-        (*sp).pos_y += (*sp).step_y;
-        (*sp).pos_x -= (*sp).step_x;
-    }
-    else if ((*sp).direction == BOTTOM_LEFT)
-    {
-        (*sp).pos_y += (*sp).step_y;
-        (*sp).pos_x += (*sp).step_x;
-    }
-    int i = set_sprite((*sp).data_register, (*sp).pos_x, (*sp).pos_y, (*sp).offset, (*sp).enable);
+    (*sp).pos_x = new_x;
+    (*sp).pos_y = new_y;
+    set_sprite((*sp).data_register, new_x, new_y, (*sp).offset, (*sp).enable);
 }
 
 /**
@@ -289,13 +254,18 @@ uint8_t collision(Sprite *sp1, Sprite *sp2)
 
     if ((*sp1).pos_x >= square2_right || (*sp2).pos_x >= square1_right)
     {
+        (*sp1).collision = 0;
+        (*sp2).collision = 0;
         return 0;
     }
     if ((*sp1).pos_y <= square2_bottom || (*sp2).pos_y <= square1_bottom)
     {
+        (*sp1).collision = 0;
+        (*sp2).collision = 0;
         return 0;
     }
-
+    (*sp1).collision = 1;
+    (*sp2).collision = 1;
     return 1;
 }
 

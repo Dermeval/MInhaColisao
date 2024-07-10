@@ -1,23 +1,14 @@
 #include <stdio.h>
-#include <unistd.h>
-#include <stdint.h>
-#include "gpu_lib.h"
 #include <stdlib.h>
 #include <fcntl.h>       
 #include <sys/mman.h>
-#include "draw_screens.h"
- 
+#include <unistd.h>  
 #define KEY_BASE 0x0
 #define LW_BRIDGE_BASE 0xFF200000
 #define LW_BRIDGE_SPAN 0x00005000
 
-int main()
-{   
-    /* Tentar abrir o arquivo do kernel do driver da GPU */
-    if (open_gpu_device() == 0)
-        return 0;
 
-
+int main(void) {
     volatile int *KEY_ptr;
     int fd = -1;
     void *LW_virtual;
@@ -38,21 +29,13 @@ int main()
 
     // Obtem o ponteiro para o endereço do botão
     KEY_ptr = (volatile int *)(LW_virtual + KEY_BASE);
-    set_background_color(0, 0, 0);
+
     // Loop para testar o botão
     while (1) {
-        printf("BTN: %d\n", *KEY_ptr & 0b1);
-        if ((*KEY_ptr & 0b1) == 0) {
-            //printf("Botão pressionado!\n");
-            draw_pause_screen();
+        if ((*KEY_ptr & 0) == 0) {
+            printf("Botão pressionado!\n");
             // Espera até o botão ser solto
-            
-        }
-        if ((*KEY_ptr & 0b10) == 0) {
-            clear_background_blocks();
-            clear_poligonos();
-            clear_sprites();
-            set_background_color(0, 0, 0);
+            while ((*KEY_ptr & 0x1) == 0x1);
         }
         usleep(100000); // Espera por 100ms
     }
@@ -60,10 +43,6 @@ int main()
     // Desmapeia a memória e fecha o arquivo
     munmap(LW_virtual, LW_BRIDGE_SPAN);
     close(fd);
-
-    return 0;
-
-    close_gpu_devide(); /* Fecha o arquivo do driver da GPU */
 
     return 0;
 }
