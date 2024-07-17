@@ -16,4 +16,6 @@ int open_mouse_device();
 
 void close_mouse_device();
 
-void mouse_movement();
+void mouse_movement(int *action, int *power_amount);
+
+int left_click();

@@ -28,26 +28,29 @@ void close_mouse_device()
     close(fd_mouse);
 }
 
-void mouse_movement()
+void mouse_movement(int *action, int *power_amount)
 {
     int bytes = read(fd_mouse, data, sizeof(data)); // Abre o arquivo MICE para leitura dos eventos de input que o mouse esta enviando
 
     left = data[0] & 0x1;   // Lê o 1º LSB e se for igual a 1 significa que o botão esquerdo foi pressionado então left = 1 tambem
     right = data[0] & 0x2;  // Lê o 2º LSB e se for igual a 1 significa que o botão direito foi pressionado então right = 1 tambem
     middle = data[0] & 0x4; // Lê o 4º LSB e se for igual a 1 significa que o botão do meio foi pressionado então middle = 1 tambem
-
-    pos_x += data[1];
-    pos_y -= data[2];
+    if (left == 1 && *power_amount > 0) {
+        *action = 1;
+        *power_amount -= 1;
+    }
+    pos_x += (data[1]/2);
+    pos_y -= (data[2]/2);
     
     if (pos_x < 0)
     {
-        printf("Y: %d\n", pos_y);
+        //printf("Y: %d\n", pos_y);
         pos_x = 0;
     }
     if (pos_x > 620)
     {
         //printf("MOVE X: %d\n", data[1]);
-        pos_x = 0;
+        pos_x = 620;
     }
 
     if (pos_y < 0)
@@ -60,5 +63,19 @@ void mouse_movement()
         //printf("MOVE Y: %d\n", data[2]);
         pos_y = 460;
     }
-    printf("Y: %d\n", pos_y);
+    //printf("Y: %d\n", pos_y);
+}
+
+int left_click() {
+    
+    int bytes = read(fd_mouse, data, sizeof(data)); // Abre o arquivo MICE para leitura dos eventos de input que o mouse esta enviando
+
+    left = data[0] & 0x1;   // Lê o 1º LSB e se for igual a 1 significa que o botão esquerdo foi pressionado então left = 1 tambem
+    right = data[0] & 0x2;  // Lê o 2º LSB e se for igual a 1 significa que o botão direito foi pressionado então right = 1 tambem
+    middle = data[0] & 0x4; // Lê o 4º LSB e se for igual a 1 significa que o botão do meio foi pressionado então middle = 1 tambem
+    if (left == 1) {
+        printf("LEFT: %d", left);
+        return 1;
+    }
+    return 0;
 }

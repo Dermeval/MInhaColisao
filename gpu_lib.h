@@ -79,7 +79,7 @@ uint16_t enable;                                     /*!< Habilita/Desabilita a 
 } Sprite_Fixed;
 
 extern Sprite_Fixed fixed_sprites_array[5];
-extern Sprite sprites_array[5];
+extern Sprite sprites_array[32];
 
 uint8_t set_sprite(uint8_t reg, uint16_t x, uint16_t y, uint8_t offset, uint8_t sp);
 
@@ -97,11 +97,11 @@ uint8_t open_gpu_device ();
 
 uint8_t create_fixed_sprite(uint8_t array_position, uint8_t reg, uint16_t x, uint16_t y, uint8_t offset, uint8_t sp );
 
-uint8_t create_sprite(uint8_t array_position, uint8_t reg, uint16_t x, uint16_t y, uint8_t offset, uint8_t sp );
+uint8_t create_sprite(uint8_t array_position, uint8_t reg, uint16_t x, uint16_t y, uint8_t offset, uint8_t step_x, uint8_t step_y, uint8_t direction, uint8_t sp);
 
 void close_gpu_devide ();
 
-void increase_coordinate(Sprite *sp, uint8_t mirror);
+void change_coordinate(Sprite *sp, uint16_t new_x, uint16_t new_y, uint8_t mirror);
 
 void clear_background_blocks();
 
@@ -116,5 +116,11 @@ void draw_sprites_anfranserai();
 void draw_sprites_PMD();
 
 void draw_mouse();
+
+void static_movement(Sprite *sp, uint8_t mirror);
+
+void clear_all();
+
+void reset_sprites();
 
 #endif /* GPU_LIB_H */

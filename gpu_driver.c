@@ -76,6 +76,7 @@ volatile int *DATA_B_PTR;
 void __iomem *LW_virtual;
 
 
+
 static int device_open(struct inode *inodep, struct file *filep);
 static int device_release(struct inode *inodep, struct file *filep);
 static ssize_t device_write(struct file *filep, const char *buffer, size_t len, loff_t *offset);
@@ -94,8 +95,12 @@ static struct file_operations fops = {
  * \param[in]       R: Valor para a cor vermelha.
 */
 void send_instruction(volatile int opcode_enderecamentos, volatile int dados) {
-
-    iowrite32(0, START_PTR); /* Atualiza o sinal de start para 0 fazendo com as intruções não sejam enviada*/
+    int buffer_gpu = ioread32(WRFULL_PTR);
+    while (buffer_gpu) {
+        iowrite32(1, START_PTR); /* Atualiza o sinal de start para 1 fazendo que as intruções sejam envidas */
+        iowrite32(0, START_PTR); /* Atualiza o sinal de start para 0 fazendo com as intruções não sejam enviadas */
+        buffer_gpu = ioread32(WRFULL_PTR);
+    }
     iowrite32(opcode_enderecamentos, DATA_A_PTR); /* Envia o OPCODE e o endereçamento necessario da intrução para a fila DATA_A*/
     iowrite32(dados, DATA_B_PTR); /* Envia os dados necessarios da intrução para a fila DATA_B*/
     iowrite32(1, START_PTR); /* Atualiza o sinal de start para 1 fazendo que as intruções sejam envidas */
@@ -163,13 +168,9 @@ static ssize_t device_write(struct file *filep, const char *buffer, size_t len, 
    
     /* Lê o valor de fila cheia */
     int buffer_gpu = ioread32(WRFULL_PTR);
-    
     /* Loop para quando a fila esta cheia o driver dar uma pequena pausa para esperar a fila liberar*/
     while (buffer_gpu){
         buffer_gpu = ioread32(WRFULL_PTR);
-        /*if (buffer_gpu == 0){
-            msleep(130);
-        }*/
     };
     
     /* Verifica se o commando recebido esta nos padrões aceitaveis pelo kernel */
@@ -242,8 +243,6 @@ static int __init my_module_init(void) {
     LW_virtual = ioremap(LW_BRIDGE_BASE, LW_BRIDGE_SPAN);
     major_number = register_chrdev(0, DEVICE_NAME, &fops);
 
-    printk(KERN_INFO "por favor\n");
-
     if (major_number < 0) {
         printk(KERN_ALERT "Falha ao registrar um número principal\n");
         return major_number;
@@ -255,8 +254,6 @@ static int __init my_module_init(void) {
         printk(KERN_ALERT "Falha ao registrar a classe do dispositivo\n");
         return PTR_ERR(gpu_class);
     }
-
-    printk(KERN_INFO "Módulo carregado: classe do dispositivo criada corretamente\n");
     gpu_device = device_create(gpu_class, NULL, MKDEV(major_number, 0), NULL, DEVICE_NAME);
     if (IS_ERR(gpu_device)) {
         class_destroy(gpu_class);
@@ -291,7 +288,6 @@ static void __exit my_module_exit(void) {
     class_unregister(gpu_class);
     class_destroy(gpu_class);
     unregister_chrdev(major_number, DEVICE_NAME);
-    printk(KERN_INFO "Módulo descarregado\n");
 
 }
 
